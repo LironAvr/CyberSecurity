@@ -8,6 +8,7 @@ import java.util.Map;
 /**
  * Created by lirona on 15/04/2017
  **/
+
 public class Encryption {
 
     private final int bufferSize = 10;
@@ -28,31 +29,34 @@ public class Encryption {
             buffer = new byte[bufferSize];
             while (-1 != this.plainText.read(buffer)) {
                 encryptBlock(buffer);
+                buffer = new byte[bufferSize];
             }
 
             return true;
         }catch(Exception ex){
             //TODO: Handle exception
+            System.out.println(ex.getMessage());
             return false;
         }
     }
 
     private void encryptBlock(byte[] block){
-        char[] charBlock = block.toString().toCharArray();
+        String temp = new String(block);
+        char[] charBlock = temp.toCharArray();
         char[] newBlock = new char[charBlock.length];
         int i = 0;
         for (char c:charBlock){
-            try{
+            if (key.containsKey(c))
                 newBlock[i] = key.get(c);
-            }catch (Exception ex){
-                //TODO: key not found
-            }
+            else newBlock[i] = c;
+            i++;
         }
         printBlock(newBlock);
     }
 
     private void printBlock(char[] newBlock) {
         //TODO: write block to file
+        System.out.print(newBlock);
     }
 
     private void openOutput(String output) {
@@ -60,6 +64,7 @@ public class Encryption {
             this.output = new FileOutputStream(output);
         }catch(Exception ex){
             //TODO: Handle file not found
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -68,6 +73,7 @@ public class Encryption {
             this.plainText = new FileInputStream(path);
         }catch(Exception ex){
             //TODO: Handle file not found
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -78,6 +84,7 @@ public class Encryption {
             inputStream.read(this.IV);
         }catch (Exception ex){
             //TODO: Handle file not found
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -93,11 +100,13 @@ public class Encryption {
                 }
                 else{
                     //TODO: Handle wrong key
+
                 }
             }
 
         }catch(Exception ex){
             //TODO: Handle file not found
+            System.out.println(ex.getMessage());
         }
     }
 }
