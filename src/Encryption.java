@@ -29,10 +29,8 @@ public class Encryption {
             return true;
         }catch(Exception ex){
             //TODO: Handle exception
+            return false;
         }
-
-
-
     }
 
     private void openText(String path){
