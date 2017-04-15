@@ -29,5 +29,6 @@ public class XORTemp {
             else if ( c != '0' )
                 throw new IllegalArgumentException();
         return toReturn;
+        ///lalala
     }
 }
