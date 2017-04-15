@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,24 +13,53 @@ public class Encryption {
     private final int bufferSize = 10;
     private Map<Character, Character> key;
     private FileInputStream plainText;
+    private FileOutputStream output;
     private byte[] buffer;
     private byte[] IV;
 
     public boolean encryptCBC(String plainText, String IV, String key, String output){
+
         try{
             openText(plainText);
+            openOutput(output);
             initIV(IV);
             initKey(key);
 
             buffer = new byte[bufferSize];
             while (-1 != this.plainText.read(buffer)) {
-
+                encryptBlock(buffer);
             }
 
             return true;
         }catch(Exception ex){
             //TODO: Handle exception
             return false;
+        }
+    }
+
+    private void encryptBlock(byte[] block){
+        char[] charBlock = block.toString().toCharArray();
+        char[] newBlock = new char[charBlock.length];
+        int i = 0;
+        for (char c:charBlock){
+            try{
+                newBlock[i] = key.get(c);
+            }catch (Exception ex){
+                //TODO: key not found
+            }
+        }
+        printBlock(newBlock);
+    }
+
+    private void printBlock(char[] newBlock) {
+        //TODO: write block to file
+    }
+
+    private void openOutput(String output) {
+        try{
+            this.output = new FileOutputStream(output);
+        }catch(Exception ex){
+            //TODO: Handle file not found
         }
     }
 
