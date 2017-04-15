@@ -3,18 +3,46 @@
  */
 public class XORTemp {
 
-    public static byte[] XOR (byte[] first, byte[] second, int n){
-        byte[] ans = new byte[n];
-        String s = toBinary(first);
+    public static byte[] XOR (byte[] first, byte[] second){
+        String[] sfirstBinary = toArrayBinary(first);
+        String[] ssecondBinary = toArrayBinary(second);
+        String[] result = new String[sfirstBinary.length];
+        int calc;
+        for (int i = 0; i < sfirstBinary.length; i++) {
+            result[i] = new String("");
+            for (int j = 0; j < sfirstBinary[i].length(); j++) {
+                calc = ((int)sfirstBinary[i].charAt(j) + (int)ssecondBinary[i].charAt(j))% 2;
+                StringBuilder sb = new StringBuilder();
+                sb.append("");
+                sb.append(calc);
+                result[i] += sb.toString();
+            }
+        }
+        return toArrayDecimal(result);
+    }
+
+    //convert from array of binary numbers (in string) to array of bytes. every cell in decimal.
+    private static byte[] toArrayDecimal(String[] binaryArray){
+        byte[] ans = new byte[binaryArray.length];
+        for (int i = 0; i < binaryArray.length; i++) {
+            ans[i] = fromBinary(binaryArray[i])[0];
+        }
         return ans;
     }
 
+    private static String[] toArrayBinary(byte[] bytes){
+        String[] ans = new String[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            ans[i] = toBinary(bytes[i]);
+        }
+        return  ans;
+    }
 
-    private static String toBinary( byte[] bytes )
+    private static String toBinary( byte bytes )
     {
-        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
-        for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
-            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
+        StringBuilder sb = new StringBuilder( Byte.SIZE);
+        for( int i = 0; i < Byte.SIZE; i++ )
+            sb.append((bytes << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
         return sb.toString();
     }
 
@@ -29,6 +57,5 @@ public class XORTemp {
             else if ( c != '0' )
                 throw new IllegalArgumentException();
         return toReturn;
-        ///lalala
     }
 }
