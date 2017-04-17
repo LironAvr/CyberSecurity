@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by lirona on 15/04/2017
@@ -8,59 +7,82 @@ import java.util.Map;
 
 public class Encryption {
 
-    private final int bufferSize = 10;
-    private Map<Character, Character> key;
-    private FileReader plainText;
-    private FileWriter output;
-    private char[] buffer;
+    //private final int bufferSize = 10;
+    private int bufferSize;
+    private HashMap<Character, Character> key;
     private char[] IV;
-    private char[] Zero;
-    private String encryptedText;
 
-    public boolean encryptCBC(String plainText, String IV, String key, String output){
+    public void encryptCBC(String plainTextPath, String initVectorPath, String keyPath, String outputPath, int bufferSize){
 
         try{
-            openText(plainText);
-            openOutput(output);
-            initIV(IV);
-            initKey(key);
-            initZero();
-            encryptedText = "";
-            this.buffer = new char[bufferSize];
+            this.bufferSize = bufferSize;
+            char[] cipher = new char[bufferSize];
+            char[] buffer;
+            String encryptedText;
 
+            initIV(initVectorPath);
+            initKey(keyPath);
+            InputOutput IO = new InputOutput(bufferSize, plainTextPath);
+            encryptedText = "";
+
+            while (null != (buffer = IO.Read())){
+
+                //Handle wrong size
+                if (bufferSize != buffer.length){
+                    char[] tempBuffer = new char[bufferSize];
+                    for (int i = 0; i < buffer.length; i++){
+                        tempBuffer[i] = buffer[i];
+                    }
+                    buffer = tempBuffer;
+                }
+
+                //Encrypt
+                for (int i = 0; i < buffer.length; i++){
+                    cipher[i] = (char) (buffer[i] ^ IV[i]);
+                    if(key.containsKey(cipher[i])){
+                        cipher[i] = key.get(cipher[i]);
+                    }
+                }
+                encryptedText += String.valueOf(cipher);
+                IV = cipher;
+            }
+            IO.write(outputPath, encryptedText);
+        }catch(Exception ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    /*public void encTemp(String plainText, String IV, String key, String output){
+        openText(plainText);
+        openOutput(output);
+        initIV(IV);
+        initKey(key);
+        encryptedText = "";
+        this.buffer = new char[bufferSize];
+        try{
             while (-1 != this.plainText.read(this.buffer)){
-                encryptBlock(this.buffer, this.IV);
+                //Check length
+                if (this.buffer.length != bufferSize){
+                    //TODO: Handle length
+                }
+
+                //XOR
+                for (int i = 0; i < buffer.length; i++){
+                    this.IV[i] = (char)(this.buffer[i] ^ this.IV[i]);
+                    if (this.key.containsKey(this.IV[i])){
+                        this.IV[i] = this.key.get(this.IV[i]);
+                    }
+                }
+                buffer = new char[bufferSize];
+                encryptedText += String.valueOf(this.IV);
             }
             this.output.write(encryptedText);
             this.output.flush();
             this.output.close();
-            return true;
         }catch(Exception ex){
-            //TODO: Handle exception
             System.out.println(ex.getMessage());
-            return false;
         }
-    }
-
-    private void initZero() {
-        Zero = new char[bufferSize];
-        for (int i = 0; i < bufferSize; i++)
-            Zero[i] = 0;
-    }
-
-    private void encryptBlock(char[] block, char[] vector){
-        char[] enc = xor(block, vector);
-        char[] newBlock = this.Zero.clone();
-
-        for(int i = 0; i < enc.length; i ++){
-            if (key.containsKey(enc[i]))
-                newBlock[i] = key.get(enc[i]);
-            else newBlock[i] = enc[i];
-        }
-
-        this.IV = newBlock;
-        encryptedText += String.valueOf(newBlock);
-    }
+    }*/
 
     private static char[] xor(char[] a, char[] b) {
         char[] result = new char[Math.min(a.length, b.length)];
@@ -71,63 +93,32 @@ public class Encryption {
         return result;
     }
 
-    private void printBlock(char[] newBlock) {
-        //TODO: write block to file
-        try{
-            System.out.print(newBlock);
-            this.output.write(newBlock);
-            output.flush();
-        }catch(Exception ex){
-            System.out.println(ex.getMessage());
-        }
-    }
-
-    private void openOutput(String output) {
-        try{
-            this.output = new FileWriter(output);
-        }catch(Exception ex){
-            //TODO: Handle file not found
-            System.out.println(ex.getMessage());
-        }
-    }
-
-    private void openText(String path){
-        try{
-            this.plainText = new FileReader(path);
-        }catch(Exception ex){
-            //TODO: Handle file not found
-            System.out.println(ex.getMessage());
-        }
-    }
-
     private void initIV(String path){
         try{
-            this.IV = new char[10];
-            FileReader inputStream = new FileReader(path);
-            inputStream.read(this.IV);
+            //this.IV = new char[10];
+            //FileReader inputStream = new FileReader(path);
+            //inputStream.read(this.IV);
+            this.IV = new InputOutput(bufferSize, path).Read();
         }catch (Exception ex){
-            //TODO: Handle file not found
             System.out.println(ex.getMessage());
         }
     }
 
     private void initKey(String path){
-        this.key = new HashMap<Character, Character>();
+        this.key = new HashMap<>();
         try{
             BufferedReader reader = new BufferedReader(new FileReader(path));
             String s;
             while((s = reader.readLine()) != null){
                 String[] var = s.split(" ");
                 if (2 == var.length){
-                    this.key.put(new Character(var[0].charAt(0)), new Character(var[1].charAt(0)));
+                    this.key.put(var[0].charAt(0), var[1].charAt(0));
                 }
                 else{
-                    //TODO: Handle wrong key
-
+                    System.out.println("Invalid Key");
                 }
             }
         }catch(Exception ex){
-            //TODO: Handle file not found
             System.out.println(ex.getMessage());
         }
     }
