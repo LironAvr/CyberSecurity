@@ -1,10 +1,4 @@
-import com.sun.org.apache.xerces.internal.impl.io.ASCIIReader;
-import com.sun.xml.internal.ws.util.ASCIIUtility;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,10 +11,10 @@ public class Encryption {
 
     private final int bufferSize = 10;
     private Map<Character, Character> key;
-    private FileInputStream plainText;
-    private FileOutputStream output;
-    private byte[] buffer;
-    private byte[] IV;
+    private FileReader plainText;
+    private FileWriter output;
+    private char[] buffer;
+    private char[] IV;
 
     public boolean encryptCBC(String plainText, String IV, String key, String output){
 
@@ -30,11 +24,11 @@ public class Encryption {
             initIV(IV);
             initKey(key);
 
-            buffer = new byte[bufferSize];
+            buffer = new char[bufferSize];
             while (-1 != this.plainText.read(buffer)) {
                 this.IV = xor(this.buffer, this.IV);
                 encryptBlock(this.IV);
-                buffer = new byte[bufferSize];
+                buffer = new char[bufferSize];
             }
 
             return true;
@@ -45,17 +39,17 @@ public class Encryption {
         }
     }
 
-    private void encryptBlock(byte[] block){
-        String temp = new String(Base64.getEncoder().encodeToString(block));
+    private void encryptBlock(char[] block){
+        //String temp = new String(Base64.getEncoder().encodeToString(block));
         //String temp  = convert(block);
         //for (byte b:block) {
             //temp += ASCIIUtility.toString(block, 0 , block.length);;
         //}
 
-        char[] charBlock = temp.toCharArray();
-        char[] newBlock = new char[charBlock.length];
+        //char[] charBlock = temp.toCharArray();
+        char[] newBlock = new char[block.length];
         int i = 0;
-        for (char c:charBlock){
+        for (char c:block){
             if (key.containsKey(c))
                 newBlock[i] = key.get(c);
             else newBlock[i] = c;
@@ -64,7 +58,7 @@ public class Encryption {
         printBlock(newBlock);
     }
 
-    String convert(byte[] data) {
+    private static String convert(byte[] data) {
         StringBuilder sb = new StringBuilder(data.length);
         sb.append("");
         for (int i = 0; i < data.length; ++ i) {
@@ -74,20 +68,20 @@ public class Encryption {
         return sb.toString();
     }
 
-    private static byte[] xor(byte[] a, byte[] b) {
-        byte[] result = new byte[Math.min(a.length, b.length)];
+    private static char[] xor(char[] a, char[] b) {
+        char[] result = new char[Math.min(a.length, b.length)];
 
         for (int i = 0; i < result.length; i++) {
-            result[i] = (byte) (((int) a[i]) ^ ((int) b[i]));
+            char temp = (char) (a[i] ^ b[i]);
+            result[i] = (char) ((int)a[i] ^ (int)b[i]);
         }
         return result;
     }
     private void printBlock(char[] newBlock) {
         //TODO: write block to file
-        byte[] out = newBlock.toString().getBytes();
         try{
             System.out.print(newBlock);
-            this.output.write(out);
+            this.output.write(newBlock);
         }catch(Exception ex){
             System.out.println(ex.getMessage());
         }
@@ -95,7 +89,7 @@ public class Encryption {
 
     private void openOutput(String output) {
         try{
-            this.output = new FileOutputStream(output);
+            this.output = new FileWriter(output);
         }catch(Exception ex){
             //TODO: Handle file not found
             System.out.println(ex.getMessage());
@@ -104,7 +98,7 @@ public class Encryption {
 
     private void openText(String path){
         try{
-            this.plainText = new FileInputStream(path);
+            this.plainText = new FileReader(path);
         }catch(Exception ex){
             //TODO: Handle file not found
             System.out.println(ex.getMessage());
@@ -113,8 +107,8 @@ public class Encryption {
 
     private void initIV(String path){
         try{
-            this.IV = new byte[10];
-            FileInputStream inputStream = new FileInputStream(path);
+            this.IV = new char[10];
+            FileReader inputStream = new FileReader(path);
             inputStream.read(this.IV);
         }catch (Exception ex){
             //TODO: Handle file not found
