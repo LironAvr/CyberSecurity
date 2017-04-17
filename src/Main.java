@@ -5,9 +5,13 @@ public class Main {
     public static void main(String[] args){
 
         Encryption enc = new Encryption();
-        enc.encryptCBC("/Users/lirona/Documents/workspace/CyberSecurity/src/plainMsg_example.txt",
+        /*enc.encryptCBC("/Users/lirona/Documents/workspace/CyberSecurity/src/plainMsg_example.txt",
                         "/Users/lirona/Documents/workspace/CyberSecurity/src/IV.txt",
                         "/Users/lirona/Documents/workspace/CyberSecurity/src/key.txt",
-                        "/Users/lirona/Documents/workspace/CyberSecurity/src/output.txt", 10);
+                        "/Users/lirona/Documents/workspace/CyberSecurity/src/output.txt", 10);*/
+        enc.decryptCBC("/Users/lirona/Documents/workspace/CyberSecurity/src/output.txt",
+                        "/Users/lirona/Documents/workspace/CyberSecurity/src/IV.txt",
+                        "/Users/lirona/Documents/workspace/CyberSecurity/src/key.txt",
+                        "/Users/lirona/Documents/workspace/CyberSecurity/src/plaintextoutput.txt", 10);
     }
 }
